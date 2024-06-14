@@ -7,13 +7,9 @@
 
   const strChunks = ref([]);
 
-  let newISIRString = ref("");
-
   let isirData = reactive(isirConfig);
 
   let arIsirs = reactive([]);
-
-  const insertAt = (str, sub, pos) => `${str.slice(0, pos)}${sub}${str.slice(pos)}`;
 
   const uploadISIR = (e) => {
     isir.value = e.target.files[0];
@@ -34,12 +30,6 @@
 
           isirData.forEach((field_data, field_key) => {
             field_data.value = isirStr.substring(parseInt(field_data.pos), parseInt(field_data.pos) + parseInt(field_data.len));
-
-            if (newISIRString.length > 0) {
-              newISIRString = insertAt(newISIRString, field_data.value, parseInt(field_data.pos));
-            } else {
-              newISIRString = field_data.value;
-            }
 
             isirTemplate.push({
               name: field_data.name,
