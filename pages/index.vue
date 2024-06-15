@@ -1,13 +1,7 @@
 <script setup>
-  import isirConfig from "../configs/isir_config";
-
   const isir = ref(null);
 
   const isirMaxLength = 7704;
-
-  const strChunks = ref([]);
-
-  let isirData = reactive(isirConfig);
 
   let arIsirs = reactive([]);
 
@@ -19,34 +13,23 @@
     if (isir.value) {
       reader.readAsText(isir.value);
 
-      reader.onload = function() {
+      reader.onload = async () => {
         const str = reader.result.toString().trimStart();
-        strChunks.value = str.match(new RegExp(`.{1,${isirMaxLength}}`, 'g'));
-      };
+        const strChunks = str.match(new RegExp(`.{1,${isirMaxLength}}`, 'g'));
 
-      reader.onloadend = function() {
-        strChunks.value.forEach((isirStr, isirKey) => {
-          let isirTemplate = [];
-
-          isirData.forEach((field_data, field_key) => {
-            field_data.value = isirStr.substring(parseInt(field_data.pos), parseInt(field_data.pos) + parseInt(field_data.len));
-
-            isirTemplate.push({
-              name: field_data.name,
-              len: parseInt(field_data.len),
-              pos: parseInt(field_data.pos),
-              value: field_data.value,
-
-            });
-          });
-
-          arIsirs.push(isirTemplate);
+        const { data } = await useFetch('/api/isir/upload', {
+          method: 'POST',
+          body: {
+            strChunks
+          }
         })
-      };
+
+        arIsirs.push(...data.value.data);
+      }
 
       reader.onerror = function() {
         console.log(reader.error);
-      };
+      }
     }
   }
 </script>
@@ -72,10 +55,8 @@
         </div>
       </div>
 
-      <div v-if="arIsirs.length > 0" v-for="(isir, index) in arIsirs" :key="'isir-block-' + index">
-        <div data-accordion="collapse">
-          <IsirEditor :isir-data="isir" :isir-key="'isir-block-' + index" />
-        </div>
+      <div v-show="arIsirs.length > 0" data-accordion="collapse">
+        <IsirEditor v-for="(isir, index) in arIsirs" :key="'isir-block-' + index" :isir-data="isir" :isir-key="'isir-block-' + index" />
       </div>
     </div>
 </template>

@@ -1,12 +1,4 @@
 <script setup>
-import { onMounted } from 'vue'
-import { initFlowbite } from 'flowbite'
-
-// initialize components based on data attribute selectors
-onMounted(() => {
-  initFlowbite();
-})
-
 const props = defineProps(['isirData', 'isirKey'])
 
 const firstName = props.isirData[24];
@@ -15,25 +7,37 @@ const lastName = props.isirData[26];
 
 let newISIRString = ref("");
 
+let isirBlockData = ref([]);
+let loadedIsir = ref(false);
+
 const insertAt = (str, sub, pos) => `${str.slice(0, pos)}${sub}${str.slice(pos)}`;
 
 const saveToFile = () => {
-  props.isirData.forEach((field_data, field_key) => {
-    if (newISIRString.length > 0) {
-      newISIRString = insertAt(newISIRString, field_data.value, parseInt(field_data.pos));
-    } else {
-      newISIRString = field_data.value;
-    }
+  if (loadedIsir.value) {
+    isirBlockData.value.forEach((field_data, field_key) => {
+      if (newISIRString.length > 0) {
+        newISIRString = insertAt(newISIRString, field_data.value, parseInt(field_data.pos));
+      } else {
+        newISIRString = field_data.value;
+      }
 
-  });
+    });
 
-  const a = document.createElement('a');
-  const blob = new Blob([newISIRString.toString()]);
-  a.href = URL.createObjectURL(blob);
-  a.download = `${lastName.value.trim()}_${middleName.value.trim()}_${firstName.value.trim()}_ISIR`;
-  a.click();
+    const a = document.createElement('a');
+    const blob = new Blob([newISIRString.toString()]);
+    a.href = URL.createObjectURL(blob);
+    a.download = `${lastName.value.trim()}_${middleName.value.trim()}_${firstName.value.trim()}_ISIR`;
+    a.click();
 
-  newISIRString = "";
+    newISIRString = "";
+  }
+}
+
+const loadContent = () => {
+  if (isirBlockData.value.length === 0) {
+    isirBlockData.value.push(...props.isirData);
+    loadedIsir.value = true;
+  }
 }
 </script>
 
@@ -41,7 +45,7 @@ const saveToFile = () => {
   <div class="my-5">
     <form class="max-w-full" @submit.prevent="saveToFile">
         <h2 :id="props.isirKey + '-heading'">
-          <button type="button" class="flex items-center justify-between w-full p-5 font-medium rtl:text-right text-gray-500 border border-b-0 border-gray-200 rounded-t-xl focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-800 dark:border-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 gap-3" :data-accordion-target="'#' + props.isirKey + '-body'" aria-expanded="false" :aria-controls="props.isirKey + '-body'">
+          <button @click="loadContent" type="button" class="flex items-center justify-between w-full p-5 font-medium rtl:text-right text-gray-500 border border-b-0 border-gray-200 rounded-t-xl focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-800 dark:border-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 gap-3" :data-accordion-target="'#' + props.isirKey + '-body'" aria-expanded="false" :aria-controls="props.isirKey + '-body'">
             <span>{{ lastName.value }} {{ middleName.value }} {{ firstName.value }}</span>
             <div class="flex items-center">
               <button
@@ -59,7 +63,7 @@ const saveToFile = () => {
         <div :id="props.isirKey + '-body'" class="hidden" :aria-labelledby="props.isirKey + '-heading'">
         <div class="p-5 border border-b-0 border-gray-200 dark:border-gray-700 dark:bg-gray-900">
             <div class="grid grid-flow-row-dense gap-4 grid-cols-4">
-              <div class="mb-3" v-for="(field, field_index) in props.isirData" :key="'f_' + (field_index + 1)">
+              <div v-if="loadedIsir" class="mb-3" v-for="(field, field_index) in isirBlockData" :key="'f_' + (field_index + 1)">
                 <label
                     :for="'f_' + (field_index + 1)"
                     class="block mb-2 text-sm font-medium text-gray-900 dark:text-white break-all"
@@ -103,8 +107,8 @@ input.input-error {
 }
 input.input-success {
   --tw-bg-opacity: 1;
-  background-color: rgb(243 250 247/var(--tw-bg-opacity));
-  border-color: rgb(14 159 110/var(--tw-border-opacity));
+  background-color: rgb(243 250 247 / var(--tw-bg-opacity));
+  border-color: rgb(14 159 110 / var(--tw-border-opacity));
   color: rgb(1 71 55/var(--tw-text-opacity));
 }
 </style>
