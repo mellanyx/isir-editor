@@ -1,4 +1,5 @@
 # ISIR Editor
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Инструкция
 
@@ -9,3 +10,6 @@
 * [Nuxt 3](https://nuxt.com/docs/getting-started/introduction)
 * [Tailwind CSS](https://tailwindcss.com/docs/installation)
 * [FlowBite | Tailwind CSS Components](https://flowbite.com/docs/getting-started/introduction/)
+
+### P.S.
+Приложение сделано на скорую руку, строго не судите. Всякая помощь и развитие приветствуется :)
